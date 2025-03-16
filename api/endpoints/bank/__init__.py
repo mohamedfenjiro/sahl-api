@@ -1,0 +1,3 @@
+"""
+Bank API endpoints initialization
+"""

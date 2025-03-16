@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Sahl API Service deployed as a Lambda container with API Gateway
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+
+Resources:
+  SahlApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageUri: 123456789012.dkr.ecr.us-east-1.amazonaws.com/sahl-api:latest
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AWS::StackName}/db-creds-*'
+        - AWSLambdaVPCAccessExecutionRole
+      Environment:
+        Variables:
+          DATABASE_URL: !Sub '{{resolve:secretsmanager:${AWS::StackName}/db-creds:SecretString:connectionURL}}'
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue DefaultSecurityGroup
+        SubnetIds:
+          - !ImportValue PrivateSubnet1
+          - !ImportValue PrivateSubnet2
+      Events:
+        RootAPI:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+        PdfParserAPI:
+          Type: Api
+          Properties:
+            Path: /parse-pdf/{proxy+}
+            Method: ANY
+        DataStorageAPI:
+          Type: Api
+          Properties:
+            Path: /store-data/{proxy+}
+            Method: ANY
+        ScraperAPI:
+          Type: Api
+          Properties:
+            Path: /scrape/{proxy+}
+            Method: ANY
