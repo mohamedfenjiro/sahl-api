@@ -24,7 +24,8 @@ class Settings(BaseSettings):
         "https://sahlfinancial.com",
         "https://app.sahlfinancial.com",
         "https://sahl-api-sandbox.onrender.com",
-        "http://localhost:8080"
+        "http://localhost:8080",
+        "http://localhost:8081"  # Added for local testing
     ]
     
     # Environment settings
